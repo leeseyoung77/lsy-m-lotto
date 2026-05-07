@@ -1,7 +1,7 @@
-name: lsy_m_lotto
+﻿name: lsy_m_lotto
 description: 로또 당첨번호 추천 앱
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.0.1+167559881
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
