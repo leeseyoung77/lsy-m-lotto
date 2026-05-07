@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../models/lotto_draw.dart';
 import '../data/lotto_history_loader.dart';
 import '../services/lotto_api_service.dart';
 import '../services/recommendation_engine.dart';
+import '../services/update_service.dart';
 import '../widgets/draw_result_row.dart';
 import '../widgets/recommendation_row.dart';
 import 'history_screen.dart';
@@ -17,6 +19,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final _apiService = LottoApiService();
   final _engine = RecommendationEngine();
+  final _updateService = UpdateService();
   final _roundController = TextEditingController();
 
   LottoDraw? _latestDraw;
@@ -34,6 +37,110 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _loadLatestDraw();
+    _checkForUpdate();
+  }
+
+  Future<void> _checkForUpdate({bool silent = true}) async {
+    final info = await _updateService.checkForUpdate();
+    if (!mounted) return;
+
+    if (info == null) {
+      if (!silent) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('업데이트 확인에 실패했습니다'),
+            backgroundColor: Color(0xFFEF4444),
+          ),
+        );
+      }
+      return;
+    }
+
+    if (!info.hasUpdate) {
+      if (!silent) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('현재 최신 버전입니다 (v${info.currentVersion})'),
+            backgroundColor: const Color(0xFF2ECC71),
+          ),
+        );
+      }
+      return;
+    }
+
+    _showUpdateDialog(info);
+  }
+
+  void _showUpdateDialog(UpdateInfo info) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF1A1A2E),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        title: Row(
+          children: [
+            const Icon(Icons.system_update_alt, color: Color(0xFF6C72CB), size: 22),
+            const SizedBox(width: 8),
+            const Expanded(
+              child: Text(
+                '새 버전이 있습니다',
+                style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '현재: v${info.currentVersion}  →  최신: ${info.latestVersion}',
+              style: const TextStyle(color: Color(0xFFCCCCDD), fontSize: 13),
+            ),
+            const SizedBox(height: 12),
+            if (info.releaseNotes.isNotEmpty)
+              Container(
+                constraints: const BoxConstraints(maxHeight: 200),
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF12121F),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: SingleChildScrollView(
+                  child: Text(
+                    info.releaseNotes,
+                    style: const TextStyle(color: Color(0xFFAAAACC), fontSize: 11, height: 1.5),
+                  ),
+                ),
+              ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('나중에', style: TextStyle(color: Color(0xFF555570))),
+          ),
+          ElevatedButton.icon(
+            onPressed: () async {
+              final navigator = Navigator.of(ctx);
+              final url = info.apkUrl ?? info.releasePageUrl;
+              if (url.isNotEmpty) {
+                await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+              }
+              navigator.pop();
+            },
+            icon: const Icon(Icons.download_rounded, size: 16),
+            label: const Text('업데이트'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF6C72CB),
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _loadLatestDraw() async {
@@ -365,6 +472,22 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const Spacer(),
+              SizedBox(
+                height: 32,
+                width: 32,
+                child: IconButton(
+                  onPressed: () => _checkForUpdate(silent: false),
+                  icon: const Icon(Icons.system_update_alt, size: 16),
+                  tooltip: '업데이트 확인',
+                  style: IconButton.styleFrom(
+                    foregroundColor: const Color(0xFF888898),
+                    backgroundColor: const Color(0xFF1A1A2E),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    padding: EdgeInsets.zero,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 6),
               SizedBox(
                 height: 32,
                 child: OutlinedButton.icon(

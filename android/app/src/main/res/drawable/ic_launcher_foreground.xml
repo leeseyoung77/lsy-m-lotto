@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- 로또볼 1 (노란색 - 왼쪽위) -->
+    <path
+        android:fillColor="#FFFBB400"
+        android:pathData="M38,34m-10,0a10,10 0,1 1,20 0a10,10 0,1 1,-20 0"/>
+    <path
+        android:fillColor="#33FFFFFF"
+        android:pathData="M34,30m-4,0a4,4 0,1 1,8 0a4,4 0,1 1,-8 0"/>
+
+    <!-- 로또볼 2 (파란색 - 오른쪽위) -->
+    <path
+        android:fillColor="#FF4A9FE5"
+        android:pathData="M62,30m-9,0a9,9 0,1 1,18 0a9,9 0,1 1,-18 0"/>
+    <path
+        android:fillColor="#33FFFFFF"
+        android:pathData="M59,27m-3.5,0a3.5,3.5 0,1 1,7 0a3.5,3.5 0,1 1,-7 0"/>
+
+    <!-- 로또볼 3 (빨간색 - 가운데) -->
+    <path
+        android:fillColor="#FFEF5350"
+        android:pathData="M50,50m-12,0a12,12 0,1 1,24 0a12,12 0,1 1,-24 0"/>
+    <path
+        android:fillColor="#33FFFFFF"
+        android:pathData="M45,45m-5,0a5,5 0,1 1,10 0a5,5 0,1 1,-10 0"/>
+
+    <!-- 로또볼 4 (초록색 - 왼쪽아래) -->
+    <path
+        android:fillColor="#FF66BB6A"
+        android:pathData="M34,68m-9,0a9,9 0,1 1,18 0a9,9 0,1 1,-18 0"/>
+    <path
+        android:fillColor="#33FFFFFF"
+        android:pathData="M31,65m-3.5,0a3.5,3.5 0,1 1,7 0a3.5,3.5 0,1 1,-7 0"/>
+
+    <!-- 로또볼 5 (보라색 - 오른쪽아래) -->
+    <path
+        android:fillColor="#FF6C72CB"
+        android:pathData="M68,64m-10,0a10,10 0,1 1,20 0a10,10 0,1 1,-20 0"/>
+    <path
+        android:fillColor="#33FFFFFF"
+        android:pathData="M64,60m-4,0a4,4 0,1 1,8 0a4,4 0,1 1,-8 0"/>
+
+    <!-- 별 반짝임 (오른쪽 상단) -->
+    <path
+        android:fillColor="#FFFBB400"
+        android:pathData="M78,20l2,4l2,-4l-4,2l4,2z"
+        android:strokeWidth="0.5"
+        android:strokeColor="#FFFBB400"/>
+
+</vector>

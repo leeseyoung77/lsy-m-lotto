@@ -20,3 +20,6 @@ android/local.properties
 # Misc
 .DS_Store
 *.log
+
+# Local analysis / one-off scripts
+analyze_distribution.py

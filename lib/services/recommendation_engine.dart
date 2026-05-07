@@ -186,6 +186,12 @@ class RecommendationEngine {
     final midHigh = dist['midHigh']!;
     final high = dist['high']!;
 
+    // 4구간 고른분포 판정 (1218회차 분석 기반)
+    // 6개 번호가 4구간(1-11/12-22/23-33/34-45)에 모두 ≥1, 최대 ≤2 분포
+    final quartile = _getQuartile(latest.numbers);
+    final isEvenSpread =
+        quartile.reduce(min) >= 1 && quartile.reduce(max) <= 2;
+
     String pattern;
     String message;
     final front = low + midLow;
@@ -201,9 +207,9 @@ class RecommendationEngine {
     } else if (center >= 3) {
       pattern = 'center_heavy';
       message = '직전 패턴: 중간 집중(20~29) ${center}개 → 양쪽 분산 추천';
-    } else if (front <= 1 && back <= 1) {
+    } else if (isEvenSpread) {
       pattern = 'spread';
-      message = '직전 패턴: 고르게 분산 → 약간의 집중 추천';
+      message = '직전 패턴: 4구간 고른 분포 → 한쪽 집중 추천';
     } else {
       pattern = 'normal';
       message = '';
@@ -228,6 +234,16 @@ class RecommendationEngine {
       'midHigh': numbers.where((n) => n >= 30 && n <= 39).length,
       'high': numbers.where((n) => n >= 40 && n <= 45).length,
     };
+  }
+
+  /// 4구간 분포 (1-11 / 12-22 / 23-33 / 34-45)
+  List<int> _getQuartile(List<int> numbers) {
+    return [
+      numbers.where((n) => n <= 11).length,
+      numbers.where((n) => n >= 12 && n <= 22).length,
+      numbers.where((n) => n >= 23 && n <= 33).length,
+      numbers.where((n) => n >= 34).length,
+    ];
   }
 
   String _analyzeRecentTrend(List<LottoDraw> recent) {
@@ -275,7 +291,23 @@ class RecommendationEngine {
         if (number >= 20 && number <= 29) bonus *= 0.5;
         break;
       case 'spread':
-        if (number >= 15 && number <= 35) bonus *= 1.2;
+        // 직전이 4구간에 고르게 퍼졌으면 → 다음은 한쪽 쏠림 유도
+        // (1218회차 분석: baseline 33% → 직전 고름시 31% 로 약 -2%p 음의 상관)
+        // 매 호출마다 무작위로 집중 방향 선택 (low-end / high-end / center)
+        final focus = _random.nextInt(3);
+        if (focus == 0) {
+          // 앞쪽(1~19) 집중
+          if (number <= 19) bonus *= 1.25;
+          if (number >= 30) bonus *= 0.85;
+        } else if (focus == 1) {
+          // 뒤쪽(27~45) 집중
+          if (number >= 27) bonus *= 1.25;
+          if (number <= 16) bonus *= 0.85;
+        } else {
+          // 중앙(15~33) 집중
+          if (number >= 15 && number <= 33) bonus *= 1.25;
+          if (number <= 8 || number >= 38) bonus *= 0.85;
+        }
         break;
     }
 
